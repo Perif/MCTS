@@ -1,8 +1,7 @@
 import numpy as np
-from tqdm import tqdm
 
 def display_board(board, play_number):
-  assert(board.shape == (3, 3))
+  assert(board.shape[0] == board.shape[1])
 
   def print_empty():
     print("|-|-|-|")
@@ -63,7 +62,7 @@ def is_game_won(board):
   return False
 
 
-def play_random_game(display=True):
+def play_random_game(game_number, display=False):
   play_number = 1
   board = np.zeros((3,3))
 
@@ -96,15 +95,26 @@ def play_random_game(display=True):
 
 
 if __name__ == "__main__":
+  from multiprocessing import Pool
+  import itertools
+  from tqdm import tqdm
+
+
+  number_of_games = 100000
+
+  results_list = []
+
+  # processing
+  pool = Pool()
+  for result in tqdm(pool.imap_unordered(play_random_game, range(number_of_games)), total=number_of_games):
+    results_list.append(result)
+
+  # compiling results
   pos = 0
   neg = 0
   player1 = 0
   player2 = 0
-  results_list = []
-  for i in tqdm(range(10000)):
-    result = play_random_game(display=False)
-    results_list.append(result)
-
+  for result in results_list:
     if result[0]:
       pos += 1
       if result[2] == 1:
@@ -114,15 +124,7 @@ if __name__ == "__main__":
     else:
       neg += 1
 
-
-
   print("Number of positives: %d" % pos)
   print("Number of negatives: %d" % neg)
   print("Player1 wins: %d" % player1)
   print("Player2 wins: %d" % player2)
-
-# result, play_number = play_random_game()
-# if result:
-#   print("We have a winner !")
-# else:
-#   print("Nobody wins")
