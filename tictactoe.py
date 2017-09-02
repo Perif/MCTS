@@ -119,12 +119,12 @@ if __name__ == "__main__":
       pos += 1
       if result[2] == 1:
         player1 += 1
-      else:
+      elif result[2]:
         player2 += 1
     else:
       neg += 1
 
-  print("Number of positives: %d" % pos)
-  print("Number of negatives: %d" % neg)
-  print("Player1 wins: %d" % player1)
-  print("Player2 wins: %d" % player2)
+  print("Number of positives: %d / %d" % (pos, number_of_games))
+  print("Number of negatives: %d / %d" % (neg, number_of_games))
+  print("Player1 wins: %2.2f%%" % (float(player1)/pos*100))
+  print("Player2 wins: %2.2f%%" % (float(player2)/pos*100))
