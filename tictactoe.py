@@ -1,93 +1,114 @@
 import numpy as np
 
-def DisplayGame(state, play_number):
-  assert(state.shape[0] == state.shape[1])
+class TicTacToe:
+  def __init__(self, board):
+    self.playerJustMoved = 2
+    self.board = board
 
-  def print_empty():
-    print("|-|-|-|")
+  def Clone(self):
+      """ Create a deep clone of this game state.
+      """
+      st = TicTacToe()
+      st.playerJustMoved = self.playerJustMoved
+      return st
 
-  def print_row(row):
-    print("|%d|%d|%d|" % (row[0], row[1], row[2]))
+  # display the current game state on screen
+  def DisplayGame(self, board, play_number):
+    assert(board.shape[0] == board.shape[1])
 
-  print("|Game:%d|" % play_number)
-  print_empty()
-  print_row(state[0])
-  print_empty()
-  print_row(state[1])
-  print_empty()
-  print_row(state[2])
-  print_empty()
+    def print_empty():
+      print("|-|-|-|")
 
+    def print_row(row):
+      print("|%d|%d|%d|" % (row[0], row[1], row[2]))
 
-def GetMoves(state):
-  return list(np.where(state.ravel() == 0)[0])
+    print("|Game:%d|" % play_number)
+    print_empty()
+    print_row(board[0])
+    print_empty()
+    print_row(board[1])
+    print_empty()
+    print_row(board[2])
+    print_empty()
 
-def HasRemainingMove(state):
-  return len(GetMoves(state))
+  # get a list of legal moves
+  def GetMoves(self, board):
+    return list(np.where(board.ravel() == 0)[0])
 
-def is_legal_move(move, state):
-  legal_moves = GetMoves(state)
-  return True if move in legal_moves else False
+  # do we have remaining moves
+  def HasRemainingMove(self, board):
+    return len(self.GetMoves(board))
 
-def DoMove(move, value, state):
-  if not is_legal_move(move, state):
-    return False
-  coords = (np.floor_divide(move, state.shape[0]),
-            np.mod(move, state.shape[0]))
-  state[coords[0], coords[1]] = value
-  return True
+  # proceed to a move move
+  def DoMove(self, move, value, board):
+    # is the move a legal move
+    def is_legal_move(move, board):
+      legal_moves = self.GetMoves(board)
+      return True if move in legal_moves else False
 
+    if not is_legal_move(move, board):
+      return False
+    coords = (np.floor_divide(move, board.shape[0]),
+              np.mod(move, board.shape[0]))
+    board[coords[0], coords[1]] = value
 
-def GetResult(state):
+    # alternate player
+    self.playerJustMoved = 3 - self.playerJustMoved
 
-  def winning_line(elems):
-    ll = list(set(elems))
-    if len(ll) == 1 and ll[0] != 0:
+    return True
+
+  # check if there is a winning game
+  def GetResult(self, board):
+    def winning_line(elems):
+      ll = list(set(elems))
+      if len(ll) == 1 and ll[0] != 0:
+        return True
+      return False
+
+    # check the diagonal
+    if winning_line(board.diagonal()):
       return True
+
+    #check rows
+    if True in np.apply_along_axis(winning_line, axis=1, arr=board):
+      return True
+
+    #check columns
+    if True in np.apply_along_axis(winning_line, axis=0, arr=board):
+      return True
+
+    # nothing was found
     return False
-
-  # check the diagonal
-  if winning_line(state.diagonal()):
-    return True
-
-  #check rows
-  if True in np.apply_along_axis(winning_line, axis=1, arr=state):
-    return True
-
-  #check columns
-  if True in np.apply_along_axis(winning_line, axis=0, arr=state):
-    return True
-
-  # nothing was found
-  return False
 
 
 def play_random_game(game_number, display=False):
   play_number = 1
-  state = np.zeros((3,3))
+  board = np.zeros((3,3))
+  game = TicTacToe(board)
+
 
   player = np.random.choice([1,2])
-  while HasRemainingMove(state):
+  while game.HasRemainingMove(board):
     # get a list of possible moves
-    possible_moves = GetMoves(state)
+    possible_moves = game.GetMoves(board)
 
     # select a move at random
     move = np.random.choice(possible_moves)
 
     # play a move
-    DoMove(move,player,state)
+    game.DoMove(move,player,board)
 
-    # show the state
+    # show the board
     if display:
-      DisplayGame(state,play_number)
+      game.DisplayGame(board,play_number)
 
     # do we have a winner ?
-    winning_status = GetResult(state)
+    winning_status = game.GetResult(board)
     if winning_status:
       break
 
     # switch players
-    if HasRemainingMove(state):
+    if game.HasRemainingMove(board):
       player = 1 if player == 2 else 2
       play_number += 1
 
