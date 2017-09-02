@@ -1,7 +1,7 @@
 import numpy as np
 
-def display_board(board, play_number):
-  assert(board.shape[0] == board.shape[1])
+def DisplayGame(state, play_number):
+  assert(state.shape[0] == state.shape[1])
 
   def print_empty():
     print("|-|-|-|")
@@ -11,34 +11,34 @@ def display_board(board, play_number):
 
   print("|Game:%d|" % play_number)
   print_empty()
-  print_row(board[0])
+  print_row(state[0])
   print_empty()
-  print_row(board[1])
+  print_row(state[1])
   print_empty()
-  print_row(board[2])
+  print_row(state[2])
   print_empty()
 
 
-def list_legal_moves(board):
-  return list(np.where(board.ravel() == 0)[0])
+def GetMoves(state):
+  return list(np.where(state.ravel() == 0)[0])
 
-def has_remaining_move(board):
-  return len(list_legal_moves(board))
+def HasRemainingMove(state):
+  return len(GetMoves(state))
 
-def is_legal_move(move, board):
-  legal_moves = list_legal_moves(board)
+def is_legal_move(move, state):
+  legal_moves = GetMoves(state)
   return True if move in legal_moves else False
 
-def make_move(move, value, board):
-  if not is_legal_move(move, board):
+def DoMove(move, value, state):
+  if not is_legal_move(move, state):
     return False
-  coords = (np.floor_divide(move, board.shape[0]),
-            np.mod(move, board.shape[0]))
-  board[coords[0], coords[1]] = value
+  coords = (np.floor_divide(move, state.shape[0]),
+            np.mod(move, state.shape[0]))
+  state[coords[0], coords[1]] = value
   return True
 
 
-def is_game_won(board):
+def GetResult(state):
 
   def winning_line(elems):
     ll = list(set(elems))
@@ -47,15 +47,15 @@ def is_game_won(board):
     return False
 
   # check the diagonal
-  if winning_line(board.diagonal()):
+  if winning_line(state.diagonal()):
     return True
 
   #check rows
-  if True in np.apply_along_axis(winning_line, axis=1, arr=board):
+  if True in np.apply_along_axis(winning_line, axis=1, arr=state):
     return True
 
   #check columns
-  if True in np.apply_along_axis(winning_line, axis=0, arr=board):
+  if True in np.apply_along_axis(winning_line, axis=0, arr=state):
     return True
 
   # nothing was found
@@ -64,30 +64,30 @@ def is_game_won(board):
 
 def play_random_game(game_number, display=False):
   play_number = 1
-  board = np.zeros((3,3))
+  state = np.zeros((3,3))
 
   player = np.random.choice([1,2])
-  while has_remaining_move(board):
+  while HasRemainingMove(state):
     # get a list of possible moves
-    possible_moves = list_legal_moves(board)
+    possible_moves = GetMoves(state)
 
     # select a move at random
     move = np.random.choice(possible_moves)
 
     # play a move
-    make_move(move,player,board)
+    DoMove(move,player,state)
 
-    # show the board
+    # show the state
     if display:
-      display_board(board,play_number)
+      DisplayGame(state,play_number)
 
     # do we have a winner ?
-    winning_status = is_game_won(board)
+    winning_status = GetResult(state)
     if winning_status:
       break
 
     # switch players
-    if has_remaining_move(board):
+    if HasRemainingMove(state):
       player = 1 if player == 2 else 2
       play_number += 1
 
