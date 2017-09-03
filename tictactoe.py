@@ -18,19 +18,16 @@ class TicTacToe:
     """
     assert(self.board.shape[0] == self.board.shape[1])
 
-    def print_empty():
-      return "|-|-|-|"
-
     def print_row(row):
       return "|%d|%d|%d|" % (row[0], row[1], row[2])
 
     representation = "|-|-|-|"
     representation += print_row(self.board[0])
-    representation = "|-|-|-|"
+    representation += "|-|-|-|"
     representation += print_row(self.board[1])
-    representation = "|-|-|-|"
+    representation += "|-|-|-|"
     representation += print_row(self.board[2])
-    representation = "|-|-|-|"
+    representation += "|-|-|-|"
 
     return representation
 
