@@ -12,35 +12,44 @@ class TicTacToe:
       st.playerJustMoved = self.playerJustMoved
       return st
 
-  # display the current game state on screen
-  def DisplayGame(self, play_number):
+  def __repr__(self,):
+    """
+    Return a string representation of the board
+    """
     assert(self.board.shape[0] == self.board.shape[1])
 
     def print_empty():
-      print("|-|-|-|")
+      return "|-|-|-|"
 
     def print_row(row):
-      print("|%d|%d|%d|" % (row[0], row[1], row[2]))
+      return "|%d|%d|%d|" % (row[0], row[1], row[2])
 
-    print("|Game:%d|" % play_number)
-    print_empty()
-    print_row(self.board[0])
-    print_empty()
-    print_row(self.board[1])
-    print_empty()
-    print_row(self.board[2])
-    print_empty()
+    representation = "|-|-|-|"
+    representation += print_row(self.board[0])
+    representation = "|-|-|-|"
+    representation += print_row(self.board[1])
+    representation = "|-|-|-|"
+    representation += print_row(self.board[2])
+    representation = "|-|-|-|"
 
-  # get a list of legal moves
+    return representation
+
   def GetMoves(self):
+    """
+    Return a list of possible legal moves
+    """
     return list(np.where(self.board.ravel() == 0)[0])
 
-  # do we have remaining moves
   def HasRemainingMove(self):
+    """
+    Check if moves are still possible
+    """
     return len(self.GetMoves())
 
-  # proceed to a move move
   def DoMove(self, move):
+    """
+    Do a game move
+    """
     # is the move a legal move
     def is_legal_move(move):
       legal_moves = self.GetMoves()
@@ -57,8 +66,10 @@ class TicTacToe:
 
     return True
 
-  # check if there is a winning game
   def GetResult(self):
+    """
+    check if there is a winning game
+    """
     def winning_line(elems):
       ll = list(set(elems))
       if len(ll) == 1 and ll[0] != 0:
@@ -81,7 +92,11 @@ class TicTacToe:
     return False
 
   def LastPlayer(self):
+    """
+    Get the ID of the last player
+    """
     return 3 - self.playerJustMoved
+
 
 def play_random_game(game_number, display=False):
   play_number = 1
@@ -102,7 +117,7 @@ def play_random_game(game_number, display=False):
 
     # show the board
     if display:
-      game.DisplayGame(play_number)
+      print(str(game))
 
     # do we have a winner ?
     winning_status = game.GetResult()
@@ -123,13 +138,14 @@ if __name__ == "__main__":
   from tqdm import tqdm
 
 
-  number_of_games = 1000
+  number_of_games = 5000
 
   results_list = []
 
   # processing
   pool = Pool()
-  for result in tqdm(pool.imap_unordered(play_random_game, range(number_of_games)), total=number_of_games):
+  for result in tqdm(pool.imap_unordered(play_random_game, range(number_of_games)),
+                     total=number_of_games):
     results_list.append(result)
 
   # compiling results
