@@ -66,30 +66,46 @@ class TicTacToe:
 
     return True
 
-  def GetResult(self):
+  def GetResult(self, player):
     """
     check if there is a winning game
     """
     def winning_line(elems):
       ll = list(set(elems))
       if len(ll) == 1 and ll[0] != 0:
-        return True
-      return False
+        return (True, ll[0])
+      return (False, None)
 
     # check the diagonal
-    if winning_line(self.board.diagonal()):
-      return True
+    diag_win, winner = winning_line(self.board.diagonal())
+    if diag_win:
+      if winner == player:
+        return 1.0
+      else:
+        return 0.0
 
     #check rows
-    if True in np.apply_along_axis(winning_line, axis=1, arr=self.board):
-      return True
+    rows_check = np.apply_along_axis(winning_line, axis=1, arr=self.board)
+    row_win = [x[1] for x in rows_check if x[0]]
+    # if there is something in row_wine, proceed
+    if row_win:
+      if row_win[0] == player:
+        return 1.0
+      else:
+        return 0.0
 
     #check columns
-    if True in np.apply_along_axis(winning_line, axis=0, arr=self.board):
-      return True
+    cols_check = np.apply_along_axis(winning_line, axis=0, arr=self.board)
+    col_win = [x[1] for x in cols_check if x[0]]
+    # if there is something in col_wine, proceed
+    if col_win:
+      if col_win[0] == player:
+        return 1.0
+      else:
+        return 0.0
 
-    # nothing was found
-    return False
+    if self.GetMoves() == []: return 0.5
+    assert False # for safety
 
   def LastPlayer(self):
     """
@@ -99,13 +115,14 @@ class TicTacToe:
 
 
 def play_random_game(game_number, display=False):
-  play_number = 1
+  play_number = 0
   board = np.zeros((3,3))
   game = TicTacToe(board)
 
 
   # player = np.random.choice([1,2])
   while game.HasRemainingMove():
+    play_number += 1
     # get a list of possible moves
     possible_moves = game.GetMoves()
 
@@ -119,17 +136,13 @@ def play_random_game(game_number, display=False):
     if display:
       print(str(game))
 
-    # do we have a winner ?
-    winning_status = game.GetResult()
-    if winning_status:
-      break
-
-    # switch players
-    if game.HasRemainingMove():
-      # player = 1 if player == 2 else 2
-      play_number += 1
-
-  return (winning_status, play_number, game.LastPlayer())
+  # do we have a winner ?
+  winning_status = game.GetResult(1)
+  if winning_status == 1:
+    return (True, play_number, 1)
+  elif winning_status == 0.0:
+    return (True, play_number, 2)
+  return (False, play_number, 0)
 
 
 if __name__ == "__main__":
@@ -156,9 +169,9 @@ if __name__ == "__main__":
   for result in results_list:
     if result[0]:
       pos += 1
-      if result[2] == 1:
+      if result[2] == 1.0:
         player1 += 1
-      elif result[2]:
+      else:
         player2 += 1
     else:
       neg += 1
