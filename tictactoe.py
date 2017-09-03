@@ -8,7 +8,7 @@ class TicTacToe:
   def Clone(self):
       """ Create a deep clone of this game state.
       """
-      st = TicTacToe(self.board)
+      st = TicTacToe(self.board.copy())
       st.playerJustMoved = self.playerJustMoved
       return st
 
@@ -21,13 +21,13 @@ class TicTacToe:
     def print_row(row):
       return "|%d|%d|%d|" % (row[0], row[1], row[2])
 
-    representation = "|-|-|-|"
+    representation = "|-|-|-|\n"
     representation += print_row(self.board[0])
-    representation += "|-|-|-|"
+    representation += "\n|-|-|-|\n"
     representation += print_row(self.board[1])
-    representation += "|-|-|-|"
+    representation += "\n|-|-|-|\n"
     representation += print_row(self.board[2])
-    representation += "|-|-|-|"
+    representation += "\n|-|-|-|\n"
 
     return representation
 
