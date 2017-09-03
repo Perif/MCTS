@@ -1,20 +1,20 @@
 import numpy as np
 
 class TicTacToe:
-  def __init__(self, board):
-    self.playerJustMoved = 2
+  def __init__(self, board, random_player=True):
+    self.playerJustMoved = np.random.choice([1,2]) if random_player else 2
     self.board = board
 
   def Clone(self):
       """ Create a deep clone of this game state.
       """
-      st = TicTacToe()
+      st = TicTacToe(self.board)
       st.playerJustMoved = self.playerJustMoved
       return st
 
   # display the current game state on screen
-  def DisplayGame(self, board, play_number):
-    assert(board.shape[0] == board.shape[1])
+  def DisplayGame(self, play_number):
+    assert(self.board.shape[0] == self.board.shape[1])
 
     def print_empty():
       print("|-|-|-|")
@@ -24,33 +24,33 @@ class TicTacToe:
 
     print("|Game:%d|" % play_number)
     print_empty()
-    print_row(board[0])
+    print_row(self.board[0])
     print_empty()
-    print_row(board[1])
+    print_row(self.board[1])
     print_empty()
-    print_row(board[2])
+    print_row(self.board[2])
     print_empty()
 
   # get a list of legal moves
-  def GetMoves(self, board):
-    return list(np.where(board.ravel() == 0)[0])
+  def GetMoves(self):
+    return list(np.where(self.board.ravel() == 0)[0])
 
   # do we have remaining moves
-  def HasRemainingMove(self, board):
-    return len(self.GetMoves(board))
+  def HasRemainingMove(self):
+    return len(self.GetMoves())
 
   # proceed to a move move
-  def DoMove(self, move, value, board):
+  def DoMove(self, move):
     # is the move a legal move
-    def is_legal_move(move, board):
-      legal_moves = self.GetMoves(board)
+    def is_legal_move(move):
+      legal_moves = self.GetMoves()
       return True if move in legal_moves else False
 
-    if not is_legal_move(move, board):
+    if not is_legal_move(move):
       return False
-    coords = (np.floor_divide(move, board.shape[0]),
-              np.mod(move, board.shape[0]))
-    board[coords[0], coords[1]] = value
+    coords = (np.floor_divide(move, self.board.shape[0]),
+              np.mod(move, self.board.shape[0]))
+    self.board[coords[0], coords[1]] = self.playerJustMoved
 
     # alternate player
     self.playerJustMoved = 3 - self.playerJustMoved
@@ -58,7 +58,7 @@ class TicTacToe:
     return True
 
   # check if there is a winning game
-  def GetResult(self, board):
+  def GetResult(self):
     def winning_line(elems):
       ll = list(set(elems))
       if len(ll) == 1 and ll[0] != 0:
@@ -66,20 +66,22 @@ class TicTacToe:
       return False
 
     # check the diagonal
-    if winning_line(board.diagonal()):
+    if winning_line(self.board.diagonal()):
       return True
 
     #check rows
-    if True in np.apply_along_axis(winning_line, axis=1, arr=board):
+    if True in np.apply_along_axis(winning_line, axis=1, arr=self.board):
       return True
 
     #check columns
-    if True in np.apply_along_axis(winning_line, axis=0, arr=board):
+    if True in np.apply_along_axis(winning_line, axis=0, arr=self.board):
       return True
 
     # nothing was found
     return False
 
+  def LastPlayer(self):
+    return 3 - self.playerJustMoved
 
 def play_random_game(game_number, display=False):
   play_number = 1
@@ -87,32 +89,32 @@ def play_random_game(game_number, display=False):
   game = TicTacToe(board)
 
 
-  player = np.random.choice([1,2])
-  while game.HasRemainingMove(board):
+  # player = np.random.choice([1,2])
+  while game.HasRemainingMove():
     # get a list of possible moves
-    possible_moves = game.GetMoves(board)
+    possible_moves = game.GetMoves()
 
     # select a move at random
     move = np.random.choice(possible_moves)
 
     # play a move
-    game.DoMove(move,player,board)
+    game.DoMove(move)
 
     # show the board
     if display:
-      game.DisplayGame(board,play_number)
+      game.DisplayGame(play_number)
 
     # do we have a winner ?
-    winning_status = game.GetResult(board)
+    winning_status = game.GetResult()
     if winning_status:
       break
 
     # switch players
-    if game.HasRemainingMove(board):
-      player = 1 if player == 2 else 2
+    if game.HasRemainingMove():
+      # player = 1 if player == 2 else 2
       play_number += 1
 
-  return (winning_status, play_number, player)
+  return (winning_status, play_number, game.LastPlayer())
 
 
 if __name__ == "__main__":
@@ -121,7 +123,7 @@ if __name__ == "__main__":
   from tqdm import tqdm
 
 
-  number_of_games = 100000
+  number_of_games = 1000
 
   results_list = []
 
