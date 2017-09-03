@@ -1,15 +1,16 @@
 import numpy as np
 
 class TicTacToe:
-  def __init__(self, board, random_player=True):
+  def __init__(self, random_player=True):
     self.playerJustMoved = np.random.choice([1,2]) if random_player else 2
-    self.board = board
+    self.board = np.zeros((3,3))
 
   def Clone(self):
       """ Create a deep clone of this game state.
       """
-      st = TicTacToe(self.board.copy())
+      st = TicTacToe()
       st.playerJustMoved = self.playerJustMoved
+      st.board = self.board.copy()
       return st
 
   def __repr__(self,):
@@ -113,8 +114,7 @@ class TicTacToe:
 
 def play_random_game(game_number, display=False):
   play_number = 0
-  board = np.zeros((3,3))
-  game = TicTacToe(board)
+  game = TicTacToe()
 
 
   # player = np.random.choice([1,2])
