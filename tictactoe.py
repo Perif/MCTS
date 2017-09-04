@@ -44,7 +44,6 @@ class TicTacToe:
     self.playerJustMoved = 3 - self.playerJustMoved
     self.board[move] = self.playerJustMoved
 
-
   def HasWinning(self):
     """
     check if there is a winning game
@@ -68,7 +67,6 @@ class TicTacToe:
     return 0.5 # draw
     assert False # for debugging
 
-
   def LastPlayer(self):
     """
     Get the ID of the last player
@@ -82,6 +80,7 @@ def play_random_game(game_number, display=False):
 
   # player = np.random.choice([1,2])
   while game.HasRemainingMove():
+    play_number += 1
     # get a list of possible moves
     possible_moves = game.GetMoves()
 
@@ -106,7 +105,6 @@ def play_random_game(game_number, display=False):
       play_number += 1
 
   return (winning_status, game.LastPlayer())
-
 
 if __name__ == "__main__":
   from multiprocessing import Pool

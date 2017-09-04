@@ -2,7 +2,6 @@ import random
 import tictactoe
 import numpy as np
 from math import sqrt, log
-import sys
 
 class Node:
     """ A node in the game tree. Note wins is always from the viewpoint of playerJustMoved.
@@ -18,7 +17,6 @@ class Node:
         self.untriedMoves = state.GetMoves()  # future child nodes
         # the only part of the state that the Node needs later
         self.playerJustMoved = state.playerJustMoved
-
 
     def UCTSelectChild(self):
         """ Use the UCB1 formula to select a child node. Often a constant UCTK is applied so we have
@@ -185,7 +183,6 @@ if __name__ == "__main__":
       else:
         neg += 1
 
-      # UCTPlayGame()
     print("Number of positives: %d / %d" % (pos, number_of_games))
     print("Number of negatives: %d / %d" % (neg, number_of_games))
     print("Player1 wins: %2.2f%%" % (float(player1)/pos*100))
