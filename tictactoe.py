@@ -11,7 +11,7 @@ class TicTacToe:
       """
       st = TicTacToe()
       st.playerJustMoved = self.playerJustMoved
-      st.board = self.board.copy()
+      st.board = self.board[:]
       return st
 
   def __repr__(self,):
@@ -59,7 +59,7 @@ class TicTacToe:
     self.board[move] = self.playerJustMoved
 
 
-  def GetResult(self):
+  def HasWinning(self):
     """
     check if there is a winning game
     """
@@ -68,6 +68,20 @@ class TicTacToe:
               if self.board[x] == 1 or self.board[x] == 2:
                 return True
     return False
+
+  def GetResult(self, player):
+    """
+    check if there is a winning game
+    """
+    for (x,y,z) in [(0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6)]:
+            if self.board[x] == self.board[y] == self.board[z]:
+                if self.board[x] == player:
+                    return 1.0
+                else:
+                    return 0.0
+    return 0.5 # draw
+    assert False # for debugging
+
 
   def LastPlayer(self):
     """
@@ -96,7 +110,7 @@ def play_random_game(game_number, display=False):
       print(str(game))
 
     # do we have a winner ?
-    winning_status = game.GetResult()
+    winning_status = game.HasWinning()
     if winning_status:
       break
 
