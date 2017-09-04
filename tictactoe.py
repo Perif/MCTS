@@ -40,20 +40,6 @@ class TicTacToe:
     """
     Do a game move
     """
-    # is the move a legal move
-    # def is_legal_move(move):
-    #   legal_moves = self.GetMoves()
-    #   return True if move in legal_moves else False
-
-    # if not is_legal_move(move):
-    #   return False
-    # coords = (np.floor_divide(move, self.board.shape[0]),
-    #           np.mod(move, self.board.shape[0]))
-    # self.board[coords[0], coords[1]] = self.playerJustMoved
-
-    # # alternate player
-    # self.playerJustMoved = 3 - self.playerJustMoved
-
     assert move >= 0 and move <= 8 and move == int(move) and self.board[move] == 0
     self.playerJustMoved = 3 - self.playerJustMoved
     self.board[move] = self.playerJustMoved
