@@ -76,19 +76,22 @@ def UCT(rootstate, itermax, verbose=False):
         state = rootstate.Clone()
 
         # Select
+        # Initially a node has not child
         while node.untriedMoves == [] and node.childNodes != []:  # node is fully expanded and non-terminal
             node = node.UCTSelectChild()
             state.DoMove(node.move)
 
         # Expand
         # if we can expand (i.e. state/node is non-terminal)
+        # select a move randomly, create a child and let him keep tack of the move
+        # that created it. Then return the child (node) and continue from it
         if node.untriedMoves != []:
             m = random.choice(node.untriedMoves)
             state.DoMove(m)
             node = node.AddChild(m, state)  # add child and descend tree
 
         # Rollout - this can often be made orders of magnitude quicker using a state.GetRandomMove() function
-        while state.GetMoves() != []:  # while state is non-terminal
+        while state.GetMoves() != [] and not state.HasWinning():  # while state is non-terminal
             state.DoMove(random.choice(state.GetMoves()))
 
         # Backpropagate
@@ -100,38 +103,87 @@ def UCT(rootstate, itermax, verbose=False):
     # Output some information about the tree - can be omitted
     if (verbose):
         print rootnode.TreeToString(0)
-    else:
         print rootnode.ChildrenToString()
 
     # return the move that was most visited
     return sorted(rootnode.childNodes, key=lambda c: c.visits)[-1].move
 
 
-def UCTPlayGame():
+def UCTPlayGame(game_number, verbose=False):
     """ Play a sample game between two UCT players where each player gets a different number
         of UCT iterations (= simulations = tree nodes).
     """
     state = tictactoe.TicTacToe()
     while (state.GetMoves() != []):
-        print str(state)
+        if verbose:
+            print(str(state))
         if state.LastPlayer() == 1:
             # play with values for itermax and verbose = True
-            m = UCT(rootstate=state, itermax=1000, verbose=False)
+            # m = np.random.choice(state.GetMoves())
+            m = UCT(rootstate=state, itermax=100, verbose=False)
         else:
-            m = np.random.choice(state.GetMoves())
-            #m = UCT(rootstate=state, itermax=100, verbose=False)
-        print "Best Move: " + str(m) + "\n"
+            m = UCT(rootstate=state, itermax=10000, verbose=False)
+        if verbose: print "Best Move: " + str(m) + "\n"
         state.DoMove(m)
-    if state.GetResult(state.LastPlayer()) == 1.0:
-        print "Player " + str(state.LastPlayer()) + " wins!"
-    elif state.GetResult(state.LastPlayer()) == 0.0:
-        print "Player " + str(3 - state.LastPlayer()) + " wins!"
+
+        if state.HasWinning(): break
+
+    result = state.GetResult(state.LastPlayer())
+    winning = False
+    winner = None
+    if result == 1.0:
+        winner = state.LastPlayer()
+        winning = True
+        if verbose:
+            print "Player " + str(state.LastPlayer()) + " wins!"
+    elif result == 0.0:
+        winner = 3 - state.LastPlayer()
+        winning = True
+        if verbose:
+            print "Player " + str(3 - state.LastPlayer()) + " wins!"
     else:
-        print "Nobody wins!"
-    print str(state)
+        if verbose:
+            print "Nobody wins!"
+    if verbose:
+        print str(state)
+
+    return (winning, winner)
+
 
 
 if __name__ == "__main__":
-    """ Play a single game to the end using UCT for both players.
+    """ Play a several game to the end using UCT for both players.
     """
-    UCTPlayGame()
+    from multiprocessing import Pool
+    import itertools
+    from tqdm import tqdm
+
+    number_of_games = 1000
+
+    results_list = []
+
+    # processing
+    pool = Pool()
+    for result in tqdm(pool.imap_unordered(UCTPlayGame, range(number_of_games)),
+                       total=number_of_games):
+      results_list.append(result)
+
+    # compiling results
+    pos = 0
+    neg = 0
+    player1 = 0
+    player2 = 0
+    for result in results_list:
+      if result[0]:
+        pos += 1
+        if result[1] == 1:
+          player1 += 1
+        elif result[1]:
+          player2 += 1
+      else:
+        neg += 1
+
+    print("Number of positives: %d / %d" % (pos, number_of_games))
+    print("Number of negatives: %d / %d" % (neg, number_of_games))
+    print("Player1 wins: %2.2f%%" % (float(player1)/pos*100))
+    print("Player2 wins: %2.2f%%" % (float(player2)/pos*100))

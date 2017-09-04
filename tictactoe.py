@@ -1,42 +1,34 @@
-import numpy as np
+import random
 
 class TicTacToe:
-  def __init__(self, random_player=True):
-    self.playerJustMoved = np.random.choice([1,2]) if random_player else 2
-    self.board = np.zeros((3,3))
+  def __init__(self):
+    self.playerJustMoved = random.choice([1,2])
+    # self.board = np.zeros((3,3))
+    self.board = [0,0,0,0,0,0,0,0,0] # 0 = empty, 1 = player 1, 2 = player 2
 
   def Clone(self):
       """ Create a deep clone of this game state.
       """
       st = TicTacToe()
       st.playerJustMoved = self.playerJustMoved
-      st.board = self.board.copy()
+      st.board = self.board[:]
       return st
 
   def __repr__(self,):
     """
     Return a string representation of the board
     """
-    assert(self.board.shape[0] == self.board.shape[1])
-
-    def print_row(row):
-      return "|%d|%d|%d|" % (row[0], row[1], row[2])
-
-    representation = "|-|-|-|\n"
-    representation += print_row(self.board[0])
-    representation += "\n|-|-|-|\n"
-    representation += print_row(self.board[1])
-    representation += "\n|-|-|-|\n"
-    representation += print_row(self.board[2])
-    representation += "\n|-|-|-|\n"
-
-    return representation
+    s= ""
+    for i in range(9):
+        s += ".XO"[self.board[i]]
+        if i % 3 == 2: s += "\n"
+    return s
 
   def GetMoves(self):
     """
     Return a list of possible legal moves
     """
-    return list(np.where(self.board.ravel() == 0)[0])
+    return [i for i in range(9) if self.board[i] == 0]
 
   def HasRemainingMove(self):
     """
@@ -48,62 +40,32 @@ class TicTacToe:
     """
     Do a game move
     """
-    # is the move a legal move
-    def is_legal_move(move):
-      legal_moves = self.GetMoves()
-      return True if move in legal_moves else False
-
-    if not is_legal_move(move):
-      return False
-    coords = (np.floor_divide(move, self.board.shape[0]),
-              np.mod(move, self.board.shape[0]))
-    self.board[coords[0], coords[1]] = self.playerJustMoved
-
-    # alternate player
+    assert move >= 0 and move <= 8 and move == int(move) and self.board[move] == 0
     self.playerJustMoved = 3 - self.playerJustMoved
+    self.board[move] = self.playerJustMoved
 
-    return True
+  def HasWinning(self):
+    """
+    check if there is a winning game
+    """
+    for (x,y,z) in [(0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6)]:
+            if self.board[x] == self.board[y] == self.board[z]:
+              if self.board[x] == 1 or self.board[x] == 2:
+                return True
+    return False
 
   def GetResult(self, player):
     """
     check if there is a winning game
     """
-    def winning_line(elems):
-      ll = list(set(elems))
-      if len(ll) == 1 and ll[0] != 0:
-        return (True, ll[0])
-      return (False, None)
-
-    # check the diagonal
-    diag_win, winner = winning_line(self.board.diagonal())
-    if diag_win:
-      if winner == player:
-        return 1.0
-      else:
-        return 0.0
-
-    #check rows
-    rows_check = np.apply_along_axis(winning_line, axis=1, arr=self.board)
-    row_win = [x[1] for x in rows_check if x[0]]
-    # if there is something in row_wine, proceed
-    if row_win:
-      if row_win[0] == player:
-        return 1.0
-      else:
-        return 0.0
-
-    #check columns
-    cols_check = np.apply_along_axis(winning_line, axis=0, arr=self.board)
-    col_win = [x[1] for x in cols_check if x[0]]
-    # if there is something in col_wine, proceed
-    if col_win:
-      if col_win[0] == player:
-        return 1.0
-      else:
-        return 0.0
-
-    if self.GetMoves() == []: return 0.5
-    assert False # for safety
+    for (x,y,z) in [(0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6)]:
+            if self.board[x] == self.board[y] == self.board[z]:
+                if self.board[x] == player:
+                    return 1.0
+                else:
+                    return 0.0
+    return 0.5 # draw
+    assert False # for debugging
 
   def LastPlayer(self):
     """
@@ -116,7 +78,6 @@ def play_random_game(game_number, display=False):
   play_number = 0
   game = TicTacToe()
 
-
   # player = np.random.choice([1,2])
   while game.HasRemainingMove():
     play_number += 1
@@ -124,7 +85,7 @@ def play_random_game(game_number, display=False):
     possible_moves = game.GetMoves()
 
     # select a move at random
-    move = np.random.choice(possible_moves)
+    move = random.choice(possible_moves)
 
     # play a move
     game.DoMove(move)
@@ -133,22 +94,24 @@ def play_random_game(game_number, display=False):
     if display:
       print(str(game))
 
-  # do we have a winner ?
-  winning_status = game.GetResult(1)
-  if winning_status == 1:
-    return (True, play_number, 1)
-  elif winning_status == 0.0:
-    return (True, play_number, 2)
-  return (False, play_number, 0)
+    # do we have a winner ?
+    winning_status = game.HasWinning()
+    if winning_status:
+      break
 
+    # switch players
+    if game.HasRemainingMove():
+      # player = 1 if player == 2 else 2
+      play_number += 1
+
+  return (winning_status, game.LastPlayer())
 
 if __name__ == "__main__":
   from multiprocessing import Pool
   import itertools
   from tqdm import tqdm
 
-
-  number_of_games = 5000
+  number_of_games = 100000
 
   results_list = []
 
@@ -166,9 +129,9 @@ if __name__ == "__main__":
   for result in results_list:
     if result[0]:
       pos += 1
-      if result[2] == 1.0:
+      if result[1] == 1:
         player1 += 1
-      else:
+      elif result[1]:
         player2 += 1
     else:
       neg += 1
