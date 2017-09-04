@@ -113,14 +113,9 @@ if __name__ == "__main__":
   import itertools
   from tqdm import tqdm
 
-
   number_of_games = 100000
 
   results_list = []
-
-
-  # for i in tqdm(range(number_of_games)):
-    # results_list.append(play_random_game(i))
 
   # processing
   pool = Pool()
