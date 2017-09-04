@@ -102,8 +102,8 @@ def UCT(rootstate, itermax, verbose=False):
 
     # Output some information about the tree - can be omitted
     if (verbose):
-        print rootnode.TreeToString(0)
-        print rootnode.ChildrenToString()
+        print(rootnode.TreeToString(0))
+        print(rootnode.ChildrenToString())
 
     # return the move that was most visited
     return sorted(rootnode.childNodes, key=lambda c: c.visits)[-1].move
@@ -120,10 +120,10 @@ def UCTPlayGame(game_number, verbose=False):
         if state.LastPlayer() == 1:
             # play with values for itermax and verbose = True
             # m = np.random.choice(state.GetMoves())
-            m = UCT(rootstate=state, itermax=100, verbose=False)
+            m = UCT(rootstate=state, itermax=10, verbose=False)
         else:
-            m = UCT(rootstate=state, itermax=10000, verbose=False)
-        if verbose: print "Best Move: " + str(m) + "\n"
+            m = UCT(rootstate=state, itermax=500, verbose=False)
+        if verbose: print("Best Move: " + str(m) + "\n")
         state.DoMove(m)
 
         if state.HasWinning(): break
@@ -135,17 +135,17 @@ def UCTPlayGame(game_number, verbose=False):
         winner = state.LastPlayer()
         winning = True
         if verbose:
-            print "Player " + str(state.LastPlayer()) + " wins!"
+            print("Player " + str(state.LastPlayer()) + " wins!")
     elif result == 0.0:
         winner = 3 - state.LastPlayer()
         winning = True
         if verbose:
-            print "Player " + str(3 - state.LastPlayer()) + " wins!"
+            print("Player " + str(3 - state.LastPlayer()) + " wins!")
     else:
         if verbose:
-            print "Nobody wins!"
+            print("Nobody wins!")
     if verbose:
-        print str(state)
+        print(str(state))
 
     return (winning, winner)
 
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     import itertools
     from tqdm import tqdm
 
-    number_of_games = 1000
+    number_of_games = 100
 
     results_list = []
 
