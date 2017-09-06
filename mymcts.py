@@ -14,6 +14,7 @@ class Node:
         self.childNodes = []
         self.wins = 0
         self.visits = 0
+        self.value = 0.0
         self.untriedMoves = state.GetMoves()  # future child nodes
         # the only part of the state that the Node needs later
         self.playerJustMoved = state.playerJustMoved
@@ -23,7 +24,7 @@ class Node:
             lambda c: c.wins/c.visits + UCTK * sqrt(2*log(self.visits)/c.visits to vary the amount of
             exploration versus exploitation.
         """
-        s = sorted(self.childNodes, key=lambda c: c.wins /
+        s = sorted(self.childNodes, key=lambda c: float(c.wins) /
                    c.visits + sqrt(2 * log(self.visits) / c.visits))[-1]
         return s
 
@@ -41,6 +42,7 @@ class Node:
         """
         self.visits += 1
         self.wins += result
+        self.value = self.wins / float(self.visits)
 
     def __repr__(self):
         return "[M:" + str(self.move) + " W/V:" + str(self.wins) + "/" + str(self.visits) + " U:" + str(self.untriedMoves) + "]"
@@ -122,7 +124,7 @@ def UCTPlayGame(game_number, verbose=False):
             # m = np.random.choice(state.GetMoves())
             m = UCT(rootstate=state, itermax=10, verbose=False)
         else:
-            m = UCT(rootstate=state, itermax=500, verbose=False)
+            m = UCT(rootstate=state, itermax=40, verbose=False)
         if verbose: print("Best Move: " + str(m) + "\n")
         state.DoMove(m)
 
@@ -131,12 +133,12 @@ def UCTPlayGame(game_number, verbose=False):
     result = state.GetResult(state.LastPlayer())
     winning = False
     winner = None
-    if result == 1.0:
+    if result == 1:
         winner = state.LastPlayer()
         winning = True
         if verbose:
             print("Player " + str(state.LastPlayer()) + " wins!")
-    elif result == 0.0:
+    elif result == -1:
         winner = 3 - state.LastPlayer()
         winning = True
         if verbose:
@@ -158,7 +160,7 @@ if __name__ == "__main__":
     import itertools
     from tqdm import tqdm
 
-    number_of_games = 100
+    number_of_games = 1000
 
     results_list = []
 

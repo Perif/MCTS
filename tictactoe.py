@@ -61,10 +61,10 @@ class TicTacToe:
     for (x,y,z) in [(0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6)]:
             if self.board[x] == self.board[y] == self.board[z]:
                 if self.board[x] == player:
-                    return 1.0
+                    return 1
                 else:
-                    return 0.0
-    return 0.5 # draw
+                    return -1
+    return 0 # draw
     assert False # for debugging
 
   def LastPlayer(self):
